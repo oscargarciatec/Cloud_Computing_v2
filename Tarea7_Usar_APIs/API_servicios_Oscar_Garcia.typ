@@ -118,6 +118,21 @@
 
 = Introducción
 
+En el ecosistema tecnológico actual, el desarrollo de aplicaciones robustas y complejas ya no requiere que los programadores
+construyan cada funcionalidad desde cero. El uso de Interfaces de Programación de Aplicaciones (APIs) se ha convertido en el estándar
+para la interoperabilidad de software.
+
+Una API es un conjunto de reglas y protocolos que permite que un programa de software se comunique con otro. Actúa como un "traductor"
+o intermediario que permite solicitar datos o servicios específicos sin necesidad de conocer la implementación interna del sistema que los provee.
+
+Una API en la nube es una interfaz que permite acceder a servicios y recursos de infraestructura
+(como procesamiento, almacenamiento o inteligencia artificial) alojados por proveedores externos como Microsoft Azure.
+A través de estas, se pueden integrar capacidades avanzadas de detección facial o síntesis de voz mediante simples peticiones HTTPS.
+
+Esta práctica pretende mostrar la facilidad de uso de APIs en la nube, dentro de una de las nubes líderes del mercada: Microsoft
+Azure. Se demostrará a través de código cómo utilizar las APIs de detección de rostros y conversión de texto a voz, junto con
+los hallazgos o resultados obtenidos.
+
 #pagebreak()
 
 = Reconocimiento de caras: MS Azure Cognitive Services
@@ -313,6 +328,8 @@ los siguientes pasos:
       # 5. Imprimir resultados
       print("\n  DETALLES TÉCNICOS POR ROSTRO ")
       display(df)```
+
+#link("https://github.com/oscargarciatec/Cloud_Computing_v2/blob/main/Tarea7_Usar_APIs/API_servicios_Oscar_Garcia.ipynb")[Liga hacia el notebook en Github]
 
 == Obtención de Resultados
 
@@ -642,6 +659,10 @@ if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
 elif result.reason == speechsdk.ResultReason.Canceled:
     print(f"Error: {result.cancellation_details.error_details}")```
 
+
+#link("https://github.com/oscargarciatec/Cloud_Computing_v2/blob/main/Tarea7_Usar_APIs/API_text_to_spech.py")[Liga hacia el script en Github]
+
+
 == Obtención de resultados y explicación
 
 A continuación se realiza una demostración en video del código anteriormente mostrado, donde:
@@ -665,6 +686,37 @@ contenido (e.g. cuentos con efectos de voz o cursos en línea), etc.
 
 = Reflexión
 
+La implementación de servicios como el Reconocimiento de Caras y la Conversión de Texto a Voz a través de Microsoft Azure Cognitive Services
+demuestra el poder de la nube para democratizar tecnologías de Inteligencia Artificial que, hace pocos años, eran exclusivas para grandes corporaciones.
+
+Uno de los hallazgos más notables es la facilidad de uso de estas herramientas. La capacidad de configurar un recurso en el portal de Azure
+en cuestión de minutos y comenzar a obtener resultados mediante scripts de Python es sumamente eficiente. El uso de librerías como requests
+y azure.cognitiveservices.speech simplifica la integración, permitiendo que el desarrollador se enfoque en la lógica del negocio y la experiencia
+del usuario.
+
+- *Desempeño y Limitaciones Técnicas*
+A pesar de la sofisticación, el ejercicio reveló que estas APIs no son infalibles. Se observó que:
+
+- Detección Facial: El algoritmo es altamente preciso en primeros planos, pero presenta dificultades con rostros en el fondo o bajo condiciones
+  de iluminación excesiva que pueden "confundir" el análisis de pixeles.
+- Síntesis de Voz: La tecnología ha avanzado al punto de ofrecer voces "neuronales" que suenan casi humanas, con la flexibilidad de ajustar
+  parámetros como el pitch y el rate para crear efectos específicos (como voces de "ardilla" o "gigante").
+
+En cuanto a las ventajas y desventajas de las APIs en la nube, podemos entonces listar:
+
+- *Ventajas:*
+  - Escalabilidad: Permiten manejar grandes volúmenes de datos sin invertir en hardware propio.
+  - Velocidad: Aceleran el tiempo de salida al mercado al usar funciones ya construidas y probadas.
+  - Seguridad: Los proveedores ofrecen capaz de autenticación robustas mediante API Keys.
+
+- *Desventajas:*
+  - Pueden generar costos imprevistos si no se monitorea el consumo.
+  - Dependencia total de la conexión a internet y del proveedor. Hace poco tiempo se presentó una caída a nivel mundial de una de las nubes líderes y muchas
+    aplicaciones dejaron de funcionar, por ejemplo.
+
+En conclusión, el uso de APIs en la nube representa una ventaja competitiva invaluable. Permiten que proyectos académicos o profesionales
+escalen rápidamente, aunque exigen que el desarrollador sea consciente de las limitaciones del entorno físico (luz, resolución) y de la gestión de costos
+y seguridad de los recursos en la nube.
 
 
 #pagebreak()
