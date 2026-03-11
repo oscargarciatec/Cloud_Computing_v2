@@ -59,7 +59,7 @@
   // Title + subtitle
   #text(font: title-font, size: 26pt, weight: "bold")[Maestría en Inteligencia Artificial:]
   #v(0.2cm)
-  #text(font: title-font, size: 18pt, weight: "bold")[_Tarea 6: Crear sistemas de administración de Base de Datos en la nube_]
+  #text(font: title-font, size: 18pt, weight: "bold")[_Tarea 7: Usar APIs en la nube_]
   #v(2.5cm)
 
 ]
@@ -89,7 +89,7 @@
 #align(right)[
   #text(size: 12pt)[Cómputo en la nube]
 
-  #text(size: 11pt)[8 de marzo de 2026]
+  #text(size: 11pt)[15 de marzo de 2026]
 ]
 
 #pagebreak()
@@ -99,7 +99,7 @@
 #outline(title: [Índice],depth: 3)
 #pagebreak()
 
-#let running_title = "Computación en la nube: Crear sistemas de administración de Base de de Datos en la nube"
+#let running_title = "Computación en la nube: Usar APIs en la nube"
 #counter(page).update(1)
 #set page(
   header: context [
@@ -116,461 +116,556 @@
 #set heading(numbering: "1.")
 #set figure(numbering: "1")
 
-= Prerrequisitos
-
-Como paso inicial para la práctica, se descargó el cliente de
-MySQL Workbench, de la página oficial. MySQL Workbench nos servirá
-para conectarnos a nuestras bases de datos, así como para crear
-nuestras estructuras y crear nuestros registros dentro de las
-tablas creadas.
-
-#link("https://www.mysql.com/products/workbench/")[*URL de la página oficial de MySQL Workbench*]
-
-#pagebreak()
-
 = Introducción
 
-En el panorama tecnológico actual, los Sistemas de Administración de Bases de Datos (DBMS)
-actúan como la columna vertebral de cualquier aplicación informática. Un manejador de base de
-datos es un software diseñado para definir, crear, mantener y controlar el acceso a los datos,
-permitiendo a los usuarios y aplicaciones interactuar con la información de manera estructurada y segura.
-Su propósito principal es garantizar la integridad, consistencia y disponibilidad de los
-datos.
-
-A diferencia del almacenamiento tradicional en archivos locales, un DBMS moderno ofrece
-mecanismos avanzados de consulta y gestión de transacciones. No obstante, la implementación
-de estos sistemas ha evolucionado drásticamente con el cómputo en la nube. Mientras que los modelos
-on-premises (en sitio) otorgan un control total, también conllevan una carga operativa
-significativa en mantenimiento de hardware y escalabilidad.
-
-Esta práctica se centra en la implementación de soluciones de bases de datos
-bajo el modelo de Plataforma como Servicio (PaaS) en dos de los proveedores de nube más importantes:
-Microsoft Azure y Google Cloud Platform (GCP). En esta práctica exploraremos
-cómo configurar servidores flexibles, bases de datos y gestionar estructuras de datos de forma remota
-utilizando clientes estándar como MySQL Workbench.
-
 #pagebreak()
 
-= Creación del manejador de base de datos en Azure
+= Reconocimiento de caras: MS Azure Cognitive Services
 
-A continuación se mostrarán imágenes de la creación del manejador de base
-de datos en Azure, así como la conexión a nuestra base de datos, la
-creación de una tabla y la inserción de registros en nuestra tabla.
+A continuación se mostrarán los pasos que se siguieron para implementar
+un script que utiliza la API de Cognitive Services de Microsoft Azure para la detección
+de rostros y rasgos faciales, dentro de una imagen.
 
-== Creación del manejador
+== Creación del servicio <sec-configuracion>
 
-El primer paso para crear el manejador es ingresar al portal de Azure,
-dar clic en "Crear un recurso", "Bases de datos" y finalmente dar clic
-en "Crear", debajo de Azure Database for MySQL Flexible Server
-
-#figure(
-    image("images/portal_azure_home.png", width: 100%),
-    caption: [Azure Portal, creación de recurso Azure Database for MySQL Flexible Server.]
-  )
-
-Después daremos clic en "Creación Avanzada", para definir manualmente
-una serie de configuración de nuestra base de datos.
+El primer paso para crear nuestro servicio para la API de Cognitive Services es
+entrar al portal de Azure
 
 #figure(
-    image("images/creacion_avanzada.png", width: 100%),
-    caption: [Pantalla de creación de base de datos.]
+    image("images/portal_home.png", width: 100%),
+    caption: [Azure Portal, pantalla principal.]
   )
 
-A continuación se muestra la pantalla de configuración de nuestro
-servidor flexible, donde aplicaremos lo siguiente:
+Una vez dentro del portal, podemos dar clic en "Crear un recurso" y, en la barra de búsqueda,
+buscaremos "Servicios de Azure AI".
 
 #figure(
-    image("images/servidor_flex_conf.png", width: 100%),
-    caption: [Configuración inicial del servidor flexible.]
+    image("images/azure_ai.png", width: 100%),
+    caption: [Servicios de Azure AI.]
   )
+
+Al dar clic sobre el servicio, se abrirá una pantalla de configuración para nuestro nuevo
+servicio. En esta pantalla, configuraremos nuestro servicio de la siguiente forma:
+
+#figure(
+    image("images/azure_ai_conf.png", width: 100%),
+    caption: [Configuración inicial del servicio de Azure AI.]
+  )
+
 
 - *Suscripción:* Seleccionaremos nuestra suscripción (Azure for Students).
-- *Grupo de recursos:* Daremos clic en crear nuevo y definiremos uno nuevo con el nombre grupo-db.
-- *Nombre del servidor:* Definiremos un nombre único para nuestro servidor (oeggtestdb).
+- *Grupo de recursos:* Daremos clic en crear nuevo y definiremos uno nuevo con el nombre GR-FaceRecog-API-Python.
 - *Región:* Definiremos una región, de acuerdo a nuestras regiones disponibles.
-- *Versión de MySQL:* Seleccionaremos la versión 8.0.
-- *Tipo de carga de trabajo:* Seleccionaremos Desarrollo/pruebas.
-- *Método de autenticación:* Seleccionaremos "Autenticación de MySQL" y definiremos uu usuario y contraseña.
+- *Nombre:* Definiremos un nombre que identifique a nuestro servicio. El nombre debe ser único. En nuestro caso, definimos el nombre "FaceRecognitionMNAOG"
+- *Plan de tarifa:* Seleccionar Standard S0.
 
-Una vez configurado nuestro servidor flexible, daremos clic en
-"Siguiente: Redes" o en la pestaña superior "Redes". En esta pantalla,
-debemos verificar que el Método de conectividad tenga seleccionada la
-opción "Acceso público (direcciones IP permitidas)".
-
-Después, en el siguiente paso, en la sección Reglas de firewall, presionaremos
-el enlace +Agregar 0.0.0.0 - 255.255.255.255. Esto permitirá que cualquier
-usuario pueda acceder desde cualquier conexión a internet.
+Una vez configurado nuestro servicio de Azure AI, podemos dar clic en el botón
+"Revisar y Crear" y, una vez validado, nos saldrá el botón "Crear" para empezar a crear
+el recurso.
 
 #figure(
-    image("images/conn_conf.png", width: 100%),
-    caption: [Configuración de Redes del servidor flexible.]
+    image("images/revisar_y_crear.png", width: 100%),
+    caption: [Revisar y crear: Página de validación.]
   )
 
-Finalmente, podemos dar clic en el botón Revisar y crear. Ahí podemos verificar
-el resumen de nuestra configuración y posteriormente dar clic en "Crear".
-
-Después de que se haya creado el recurso, podemos dar clic en el botón
-"Ir al recurso", donde podremos ver la información general de nuestro
-servidor flexible. De esta pantalla, debemos guardar el dato que
-se llama "Punto de conexión", ya que nos servirá más adelante para conectarnos.
+Una vez que se haya creado nuestro servicio, podremos dar clic en el botón "Ir al recurso". Esto nos
+llevará a la página de información general del servicio.
 
 #figure(
-    image("images/serv_flexible_props.png", width: 100%),
-    caption: [Información general de nuestro servidor flexible de Azure Database.]
+    image("images/creation_completed.png", width: 100%),
+    caption: [Creación del servicio completada.]
   )
 
-Posteriormente, nos dirigiremos a la sección Configuración -> Bases de datos. Se nos
-abrirá una pantalla de "Bases de Datos". Ahí, daremos clic en "+ Agregar" y
-definiremos un nombre para nuestra base de datos (E.g. compradores) y daremos clic
-en "Guardar".
+== Obtención de la llave
 
-Una vez realizado esto, podremos ver que nuestra base de datos en el listado de
-bases de datos. Este solo es el "esqueleto" de nuestra base de datos; la estructura
-y los datos deben ingresarse desde otro entorno o aplicación como
-MySQL Workbench.
+Dentro de la página de información general del servicio, podremos ver en el menú lateral la sección
+"Administración de recursos -> Claves y puntos de conexión" a la cual le daremos clic y nos abrirá
+una nueva pantalla.
 
 #figure(
-    image("images/bd_creada_azure.png", width: 100%),
-    caption: [Base de datos compradores creada.]
+    image("images/general_info.png", width: 100%),
+    caption: [Información general de nuestro servicio de Azure AI.]
   )
 
-== Conexión desde MySQL Workbench
+Una vez en la pantalla nueva, tenemos que poner atención en dos cosas principales:
 
-Ya que tenemos nuestra base de datos creada, iremos a nuestra aplicación
-MySQL Workbench y daremos clic en el botón "+", que se encuentra
-después del texto MySQL Connections.
+1. La Clave 1. Esta clave nos servirá como API Key para poder utilizar la API de detección
+  de rostros. Para ello, es necesario dar clic en "Mostrar claves" y después dar clic en el botón de copiar,
+  si así lo deseamos.
 
-En la creaeción de la conexión hacia el manejador de BD que tenemos
-en azure, estableceremos los siguientes valores:
-
-- *Connection name:* Colocar un nombre distintivo de la conexión. Es algo local, para identificar a dónde deseamos conectarnos (e.g. azure_compradores).
-- *Hostname:* Es el nombre o IP del servidor donde está nuestro DBMS. Es el valor que copiamos en
-  la sección anterior. En nuestro caso: oeggtestdb.mysql.database.azure.com
-- *Username:* El usuario que creamos en la configuración del manejador (e.g. oeggadmin).
-
-Después, presionaremos en el botón "Store in Keychain..." (o Store in Vault..) e
-ingresaremos la contraseña del usuario administrador que definimos.
-
-Finalmente, en *Default Schema* debemos indicar el nombre de la base
-de datos a la que deseamos conectarnos, en este caso *compradores*. Daremos
-clic en el botón "Test Connection", para verificar que la conexión puede
-establecerse con éxito.
+2. El endpoint que se muestra hasta abajo. Este endpoint también es importante para que nuestro código
+  sepa a dónde conectarse para la utilización del servicio.
 
 #figure(
-    image("images/conn_azure.png", width: 100%),
-    caption: [Conexión exitosa hacia nuestra base de datos en Azure.]
+    image("images/key_endpoint.png", width: 100%),
+    caption: [Información general de nuestro servicio de Azure AI.]
   )
 
-Posteriormente, daremos clic en "Ok" y nos regresará a la pantalla
-principal de la aplicación. Ahí, podremos ver listada nuestra nueva
-conexión. Daremos clic en ella, para acceder a nuestra base de datos.
+== Uso de la API CS dentro de un notebook/script
+
+Ya que hemos creado nuestro servicio de Azure AI, podemos utilizar el endpoint y el API Key que obtuvimos
+en el paso anterior, para realizar acciones de detección de rostros en una serie de imágenes.
+
+Al final de esta sección se incluye la liga hacia el notebook que se utilizó para estas pruebas, donde
+se encuentra todo el detalle y comentarios sobre cada sección del código, pero se puede resumir en
+los siguientes pasos:
+
+1. Importación de librerías globales y carga de variables: en esta sección se hace un _import_ de las
+  librerías globales que se utilizarán dentro de nuestro código y se cargan nuestras variables locales,
+  a partir de un archivo .env, con la función load_dotenv().
 
 #figure(
-    image("images/conn_azure_home.png", width: 100%),
-    caption: [Conexión listada en la página principal de MySQL Workbench.]
+    image("images/librerias.png", width: 100%),
+    caption: [Librerías importadas en el código.]
   )
 
-== Creación de nuestra estructura en base de datos
-
-Una vez dentro de nuestra conexión, iremos a la pestaña "Schemas"
-y daremos clic en el botón de "Creación de tabla" (5to botón
-de izquierda a derecha que es una tabla con un signo +).
-
-En la siguiente pantalla, definiremos nuestra tabla *clientes*, de la
-siguiente forma y daremos clic en el botón *Apply*:
+2. Configuración del API Key y el Endpoint: en esta sección se definen nuestras variables que servirán para
+  realizar la conexión hacia nuestro servicio de Azure AI, previamente creado.
 
 #figure(
-    image("images/tabla_clientes.png", width: 100%),
-    caption: [Tabla de clientes.]
+    image("images/api_conf_end.png", width: 100%),
+    caption: [Configuración del API Key y el Endpoint.]
   )
 
-Aparecerá después un cuadro de diálogo indicando las sentencias SQL
-que se enviarán al DBMS en la nube. Verificaremos y presionaremos
-nuevamente *Apply*. Esto nos regresará nuevamente a nuestra página
-principal, donde podremos ver en el árbol que se creó nuestra
-nueva tabla.
-
-== Inserción de registros en nuestra tabla clientes
-
-Posteriormente daremos clic en el último botón, delante del nombre de nuestra tabla. Esto
-nos abrirá una página donde se hará un *SELECT* de nuestra tabla
-y nos permitirá manipular los datos.
+3. Configuración y creación de la petición (request) ejemplo: en esta
+  sección se define la URL del endpoint, los headers (donde aparece la autenticación), los parámetros y,
+  finalmente, se arma la petición a través de la librería _requests_, para una imagen de ejemplo.
 
 #figure(
-    image("images/select_clientes.png", width: 100%),
-    caption: [Select a Tabla de clientes.]
+    image("images/request.png", width: 100%),
+    caption: [Configuración y creación de la petición.]
   )
 
-En el grid de resultados (parte inferior de la pantalla), podremos
-ingresar los datos de nuestra tabla de "clientes". Como podemos
-ver, no se define el idcliente, ya que está definido como un
-auto-incremental.
+4. Definición de función reutilizable: en esta sección se crea la función _print_landmarks_ que nos permitirá
+  imprimir nuestras imágenes, además de los objetos de detección que devuelve la API: detección de posición de
+  rostros (con su índice asociado), ojos, labios, cejas, nariz, etc., además de imprimir cada uno de los datos en un formato de
+  dataframe de _Pandas_.
+
+```python
+  import pandas as pd
+  import matplotlib.pyplot as plt
+  import requests
+  from PIL import Image, ImageDraw, ImageFont
+  from io import BytesIO
+  from IPython.display import display
+
+  def print_landmarks(image_url, data):
+      # --- CONFIGURACIÓN DE PANDAS ---
+      pd.set_option('display.max_columns', None)
+      pd.set_option('display.max_rows', None)
+
+      # 1. DESCARGA Y APERTURA DE IMAGEN
+      try:
+          response_img = requests.get(image_url)
+          img = Image.open(BytesIO(response_img.content)).convert("RGB")
+      except Exception as e:
+          print(f"Error al cargar la imagen: {e}")
+          return
+
+      draw = ImageDraw.Draw(img)
+
+      # 2. PROCESAMIENTO DE CADA ROSTRO
+      for i, row in enumerate(data):
+          rect = row['faceRectangle']
+          left, top = rect['left'], rect['top']
+          width, height = rect['width'], rect['height']
+          right, bottom = left + width, top + height
+
+          # --- LÓGICA DE TEXTO GRANDE Y ESCALABLE ---
+          font_size = int(width * 0.3)
+
+          try:
+              font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", font_size)
+          except:
+              try:
+                  font = ImageFont.truetype("Arial.ttf", font_size)
+              except:
+                  font = ImageFont.load_default()
+
+          # A. Dibujar el Rectángulo del rostro
+          draw.rectangle([left, top, right, bottom], outline='red', width=6)
+
+          # B. Dibujar el fondo del número
+          bbox = draw.textbbox((left, top), str(i), font=font)
+          draw.rectangle([bbox[0]-5, bbox[1]-font_size, bbox[2]+5, bbox[1]], fill='black')
+
+          # C. Escribir el número de índice
+          draw.text((left, top - font_size), str(i), fill='white', font=font)
+
+          # D. Dibujar los Landmarks
+          landmarks = row['faceLandmarks']
+          r = max(3, int(width * 0.015))
+
+          for feature_name, coords in landmarks.items():
+              x, y = coords['x'], coords['y']
+              draw.ellipse([x - r, y - r, x + r, y + r], fill='blue', outline='white', width=1)
+
+      # 3. VISUALIZACIÓN DE LA IMAGEN
+      plt.figure(figsize=(15, 12))
+      plt.imshow(img)
+      plt.axis('off')
+      plt.title(f"Análisis Exhaustivo: {len(data)} rostros detectados", fontsize=16)
+      plt.show()
+
+      # 4. CREACIÓN Y MUESTRA DEL DATAFRAME
+      df = pd.json_normalize(data)
+
+      # 5. Imprimir resultados
+      print("\n  DETALLES TÉCNICOS POR ROSTRO ")
+      display(df)```
+
+== Obtención de Resultados
+
+Como pudimos ver en la sección anterior, la API devuelve un JSON que contiene dos cosas principales:
+
+1. La posición y tamaño de las áreas donde fue detectado un rostro.
+
+2. La posición (coordenadas _x_ y _y_) de los bordes de cada rasgo caracterísitico de los rostros, como
+lo son boca, nariz, pupilas, cejas, labio superior, labio inferior, etc.
+
+A continuación se muestra un framgento del JSON que resulta como respuesta de la API, donde podemos
+ver lo que se describe en los puntos anteriores; "faceRectangle" corresponde a cada uno de los
+rostros detectados y el arreglo "faceLandmarks" contiene cada una de las posiciones para los
+diferentes rasgos.
+
+  ```json
+  [{"faceRectangle": {
+    "top": 352, "left": 467, "width": 50, "height": 50},
+  "faceLandmarks": {
+    "pupilLeft": {"x": 479.8, "y": 366.1},
+    "pupilRight": {"x": 503.6, "y": 367.2},
+    "noseTip": {"x": 493.8, "y": 377.7},
+    "mouthLeft": {"x": 479.6, "y": 388.1},
+    "mouthRight": {"x": 500.7, "y": 389.4},
+    "eyebrowLeftOuter": {"x": 470.8, "y": 361.6},
+    "eyebrowLeftInner": {"x": 489.6, "y": 361.4},
+    "eyeLeftOuter": {"x": 477.3, "y": 366.6},
+    "eyeLeftTop": {"x": 480.2, "y": 365.6},
+    "eyeLeftBottom": {"x": 480.2, "y": 367.2},
+    "eyeLeftInner": {"x": 483.0, "y": 366.6},
+    "eyebrowRightInner": {"x": 497.2, "y": 361.6},
+    "eyebrowRightOuter": {"x": 513.3, "y": 363.2},
+    "eyeRightInner": {"x": 500.1, "y": 367.2},
+    "eyeRightTop": {"x": 503.6, "y": 366.3},
+    "eyeRightBottom": {"x": 503.7, "y": 367.7},
+    "eyeRightOuter": {"x": 506.6, "y": 367.4},
+    "noseRootLeft": {"x": 488.6, "y": 367.0},
+    "noseRootRight": {"x": 496.0, "y": 367.1},
+    "noseLeftAlarTop": {"x": 487.1, "y": 374.2},
+    "noseRightAlarTop": {"x": 497.6, "y": 374.6},
+    "noseLeftAlarOutTip": {"x": 483.8, "y": 377.9},
+    "noseRightAlarOutTip": {"x": 500.6, "y": 378.6},
+    "upperLipTop": {"x": 491.3, "y": 387.0},
+    "upperLipBottom": {"x": 491.3, "y": 389.2},
+    "underLipTop": {"x": 491.1, "y": 391.8},
+    "underLipBottom": {"x": 491.0, "y": 395.3}}},
+  {"faceRectangle": {"top": 312, "left": 736, "width": 49, "height": 49},
+    "faceLandmarks": {
+      "pupilLeft": {"x": 749.2, "y": 326.6},
+      "pupilRight": {"x": 771.3, "y": 326.0},
+      "noseTip": {"x": 759.4, "y": 337.7},
+      "mouthLeft": {"x": 749.7, "y": 347.8},
+      "mouthRight": {"x": 773.5, "y": 346.8},
+      "eyebrowLeftOuter": {"x": 740.6, "y": 325.1},
+      "eyebrowLeftInner": {"x": 754.6, "y": 323.0},
+      "eyeLeftOuter": {"x": 745.8, "y": 327.7},
+      "eyeLeftTop": {"x": 749.0, "y": 325.6},
+      "eyeLeftBottom": {"x": 749.3, "y": 328.5},
+      "eyeLeftInner": {"x": 752.5, "y": 327.2},
+      "eyebrowRightInner": {"x": 764.8, "y": 322.3},
+      "eyebrowRightOuter": {"x": 779.7, "y": 322.9},
+      "eyeRightInner": {"x": 767.5, "y": 326.6},
+      "eyeRightTop": {"x": 771.2, "y": 324.6},
+      "eyeRightBottom": {"x": 770.9, "y": 327.7},
+      "eyeRightOuter": {"x": 774.6, "y": 326.6},
+      "noseRootLeft": {"x": 756.5, "y": 327.2},
+      "noseRootRight": {"x": 763.2, "y": 327.0},
+      "noseLeftAlarTop": {"x": 754.9, "y": 333.5},
+      "noseRightAlarTop": {"x": 765.3, "y": 333.4},
+      "noseLeftAlarOutTip": {"x": 751.6, "y": 337.5},
+      "noseRightAlarOutTip": {"x": 769.1, "y": 336.6},
+      "upperLipTop": {"x": 760.2, "y": 345.2},
+      "upperLipBottom": {"x": 760.5, "y": 347.3},
+      "underLipTop": {"x": 760.8, "y": 351.6},
+      "underLipBottom": {"x": 761.1, "y": 354.9}}}']```
+
+Como ya tenemos definida nuestra función, podemos aplicarla para el procesamiento y análisis de diferentes
+imágenes, que se muestran a continuación.
+
+=== Aplicación de código a imagen muestra
+
+A continuación se muestra la imagen resultante de aplicar nuestra función personalizada
+a la imagen muestra de la guía, con la detección de los rostros y rasgos correspondientes.
 
 #figure(
-    image("images/insert_sql_clientes.png", width: 100%),
-    caption: [Inserción de registros a Tabla de clientes.]
+    image("images/muestra_img.png", width: 100%),
+    caption: [Imagen muestra: detección de rostros y rasgos.]
   )
-
-Después de ingresar los datos, daremos clic en el botón *Apply*, para
-mandar los datos a la nube. Aparecerá un cuadro de diálogo mostrando
-nuevamente la sentencia SQL que se utilizará en el manejador. Daremos
-clic nuevamente en *Apply* para ejecutarla.
-
-Al tener éxito la transferencia de la información, aparecerá un mensaje
-de confirmación. Presionaremos *Finish* para salir nuevamente a nuestra
-página principal.
 
 #figure(
-    image("images/execute_sql_confirm.png", width: 100%),
-    caption: [Confirmación de ejecución de sentencias SQL.]
+    image("images/muestra_datos.png", width: 100%),
+    caption: [Fragmento de datos recuperados por API de detección de rostros.]
   )
 
-Al regresar a nuestra pantalla de trabajo, observaremos que nuestros
-registros siguen ahí, pero ahora ya tienen un id asignado
-por el manejador. Esto quiere decir que los datos ya se encuentran
-en la nube.
+#text(font: sc-font, size: 14pt, tracking: 0.03em)[
+  #underline(
+    stroke: 0.5pt + black,
+    offset: 2pt,
+    evade: true
+  )[Hallazgos e interpretación de resultados para imagen muestra]
+]
+
+Para esta imagen, podemos ver que se detectaron 8 rostros (que corresponden a cada registro del dataframe) y que se "pintaron" los puntos clave
+dentro de la imagen. Los cuadros rojos representan cada "faceRectangle" que consta de una posición "top",
+una posición "left", un ancho y un alto, para poder plasmarlo.
+
+Por otro lado, los círculos azules corresponden a cada uno de los rasgos detectados dentro de
+esas áreas de rostros, pertenecientes a ojos, labios, nariz,
+cejas, etc. Asimismo, como con los "faceRectangles", podemos pintar sobre nuestra imagen estos
+puntos llamados "faceLandmarks" y podemos verificar que la detección de los mismos
+haya sido correcta y precisa.
+
+=== Aplicación de código a imagen personal 1.
 
 #figure(
-    image("images/datos_azure_nube.png", width: 100%),
-    caption: [Datos insertados en nuestra base de datos.]
+    image("images/img_1_results.png", width: 100%),
+    caption: [Imagen personal 1: detección de rostros y rasgos.]
   )
-
-== Anexo: URL del servidor flexible en Azure
-
-A continuación se muestra la URL (punto de conexión) de nuestro servidor flexible. Sin embargo, es
-posible que al momento de la revisión de esta guía, el servidor se
-encuentre apagado o se haya borrado.
-
-#link("oeggtestdb.mysql.database.azure.com")
-
-= Creación del manejador de base de datos en Google Cloud Platform
-
-A continuación se mostrarán imágenes de la creación del manejador de base
-de datos en Google Cloud Platform, así como la conexión a nuestra base de datos, la
-creación de una tabla y la inserción de registros en nuestra tabla.
-
-== Creación del manejador
-
-Entraremos a nuestra consola de Google Cloud y, en el menú de hamburguesa,
-daremos clic en "Cloud SQL".
 
 #figure(
-    image("images/cloud_sql_menu.png", width: 100%),
-    caption: [Menú de Google Cloud - Cloud SQL.]
+    image("images/img_1_data.png", width: 100%),
+    caption: [Imagen personal 1: Fragmento de datos recuperados por API de detección de rostros.]
   )
 
-Una vez dentro de Cloud SQL, daremos clic en el botón "+ CREATE INSTANCE",
-que se encuentra en la parte superior o en el botón que se
-encuentra en la parte inferior de la página.
+#text(font: sc-font, size: 14pt, tracking: 0.03em)[
+  #underline(
+    stroke: 0.5pt + black,
+    offset: 2pt,
+    evade: true
+  )[Hallazgos e interpretación de resultados para imagen personal 1]
+]
 
-Después de dar clic, se nos mostrarán tres opciones con diferentes
-tecnologías que pueden manejar SQL. Para nuestra práctica, elegiremos
-MySQL, presionando el botón "Choose MySQL".
+En este caso, podemos ver que únicamente se detectaron 9 rostros (los registros del dataframe) y que otros dos rostros quedaron fuera de
+esta detección. Esto podría deberse a que los rostros se encuentran un poco más atrás que "el plano principal" y el algoritmo de detección
+podría tener problemas con este tipo de casos, donde se da prioridad al "primer plano".
+
+Cabe mencionar que, al igual que en el caso anterior, los rasgos parecen haberse plasmado de forma correcta para los 9 rostros
+detectados.
+
+=== Aplicación de código a imagen personal 1.
 
 #figure(
-    image("images/choose_mysql.png", width: 100%),
-    caption: [Pantalla para seleccionar tecnología de nuestra BD.]
+    image("images/img_2_results.png", width: 100%),
+    caption: [Imagen personal 2: detección de rostros y rasgos.]
   )
-
-Después, se nos mostrará la pantalla de configuración de nuestra instancia,
-donde configuraremos lo siguiente:
 
 #figure(
-    image("images/conf_mysql_gcp.png", width: 100%),
-    caption: [Configuración de instancia MySQL - GCP]
+    image("images/img_2_data.png", width: 100%),
+    caption: [Imagen personal 2: Fragmento de datos recuperados por API de detección de rostros.]
   )
 
-- *Cloud SQL Edition:* Enterprise
-- *Edition preset:* Sandbox
-- *Database version:* Elegiremos la que sea igual a la que instalamos en MySQL Workbench (en mi caso, 8.0).
-- *Instance ID:* Definiremos un identificador de la instancia. Podemos nombrarla como queramos (e.g. mysqldatabasetest)
-- *Password:* Definiremos la clave principal de nuestro manejador. Esta clave se asignará como la clave del usuario root de MySQL.
-- *Choose region and zone availability:* Dejarmeos la opción "Single Zone", que aparece por default.
+#text(font: sc-font, size: 14pt, tracking: 0.03em)[
+  #underline(
+    stroke: 0.5pt + black,
+    offset: 2pt,
+    evade: true
+  )[Hallazgos e interpretación de resultados para imagen personal 2]
+]
 
-Nos aseguraremos que, dentro de la sección "Instance IP assignment" esté
-marcada la opción "Public IP", para que nuestro servidor de base de datos esté
-disponible a través de internet.
+Finalmente, para esta imagen también podemos notar que una de las personas no fue detectada correctamente. Esto puede deberse a que en
+esa parte de la imagen hay mucha luz, lo que pudo haber confundido al algoritmo para la detección.
 
-Posteriormente daremos clic en el botón "Show configuration options", para ver y
-configurar más parámetros. Expandiremos el menú "Connections", buscaremos
-el campo "Authorized networks" y daremos clic en *Add a network*.
+Otro factor que pudo haber jugado en contra
+para la detección de esta persona es la resolución de la imagen (está un tanto pixelada),
+ya que estos algoritmos suelen comparar los pixeles
+aledaños, luces, cambios de color, etc, para la detección de objetos o personas.
 
-Se desplegará un apartado para editar la red, que permitiremos conectar
-a nuestro manejador. Para aceptar cualquier conexión, debemos
-colocar los valores siguientes:
+== Conclusiones de la aplicación del algoritmo de detección de rostros
 
-- *Name:* Todas (es solo un identificador).
-- *Network:* 0.0.0.0/0
+Con los diferentes ejemplos que mostramos, podemos concluir los siguientes puntos:
 
-Seleccionar la caja "I acknowledge the risks" y dar clic en el botón *DONE*.
-
-#figure(
-    image("images/network_gcp.png", width: 100%),
-    caption: [Configuración de instancia MySQL - GCP]
-  )
-
-Con la configuración lista, podemos presionar el botón "CREATE INSTANCE"
-para comenzar con el proceso de creación de nuestro manejador
-de base de datos.
-
-Una vez que finalice la creación, se mostrará un mensaje, indicando que
-ha sido creada la instancia y que se encuentra lista para utilizar.
-
-De igual forma, se mostrará la página del manejo de la instancia del manejador. Aquí,
-podemos gestionar usuarios, conexiones, réplicas, etc. Por ahora, guardaremos
-el dato que se muestra en *Public IP Address*, que nos servirá posteriormente
-para conectarnos. En nuestro caso es: 35.233.135.214
-
-#figure(
-    image("images/public_ip_add.png", width: 100%),
-    caption: [Datos de conexión de nuestra instancia - GCP]
-  )
-
-Después de haber revisado nuestros datos, nos moveremos al apartado "Users". En
-esta página, podemos administrar los usuarios de nuestro manejador de base de datos. Siempre
-es reocmendable que cada base de datos al menos tenga un usuario para su
-manipulación. Presionaremos el botón *+ ADD USER ACCOUNT* para crearlo.
-
-Crearemos un nuevo usuario (e.g. dbuser) y definiremos un password para él. Finalmente,
-daremo s clic en *ADD* para finalizar la creación del usuario. Al finalizar el proceso,
-podremos ver al usuario en la lista de usuarios.
-
-#figure(
-    image("images/user_created.png", width: 100%),
-    caption: [Usuario creado en nuestra instancia - GCP]
-  )
-
-
-Ahora iremos al apartado "Databases", donde crearemos una base datos, preisonando
-el botón *+ CREATE DATABASE*. En la sección de creación, solamente ingresaremos el nombre
-de la base de datos (e.g. clientes) y daremos clic en *CREATE*.
-
-Una vez finalizado el proceso de creación, podremos visualizar el nombre de
-nuestra base de datos en el listado de bases de datos del manejador.
-
-#figure(
-    image("images/db_created.png", width: 100%),
-    caption: [Base de datos creada en nuestra instancia - GCP]
-  )
-
-== Conexión desde MySQL Workbench
-
-Después de esto, podemos ir a nuestra aplicación MySQL Workbench para
-conectarnos a nuestra base de datos para crear nuestra estructura y poder
-guardar nuestros datos.
-
-Para ello, repetiremos los pasos que seguimos para conectarnos a nuestra
-instancia de Azure, dando clic en el botón *+*, delante
-de "MySQL Connections", donde definiremos nuestros datos de conexión:
-
-- *Connection name:* Definiremos el nombre de nuestra conexión.
-- *Hostname:* La IP que guardamos en la sección anterior, que corresponde a la IP pública de nuestro manejador.
-  En nuestro caso, 35.233.135.214.
-- *Username:* El usuario con el que deseamos conectarnos. Utilizaremos el super usuario del manejador (root).
-- *Default schema:* La base de datos a la que nos queremos conectar; en nuestro caso, *clientes*.
-
-Presionaremos el botón Store in Keychain...(o Store in Vault), para asignar una clave a utilizar con el usuario deifnido. Al
-regresar al cuadro de diálogo, presionaremos el botón *Test Connection* para probar
-que se puede establecer una conexión correcta. Si todo funciona correctamente, aparecerá
-un mensaje indicando la conexión exitosa.
-
-#figure(
-    image("images/conn_gcp.png", width: 100%),
-    caption: [Conexión exitosa a nuestra instancia de GCP.]
-  )
-
-Nuevamente al dar clic en "OK", se mostrará nuestra conexión en la página
-principal de MySQL Workbench, donde daremos clic sobre esta, para conectarnos.
-
-== Creación de nuestra estructura en base de datos
-
-Una vez dentro, procederemos a repetir los pasos que seguimos para nuestra
-base de datos en Azure.
-
-1. Movernos a la pestaña de schemas para ver el listado de elementos asociados
-  a nuestra base de datos: tables, views, stored procedures, etc.
-2. Presionar el botón para *crear una nueva tabla* (el 5to de izquierda a derecha, en la barra de herramientas).
-
-Al realizar estos pasos, aparecerá un apartado donde realizaremos el diseño
-de la nueva tabla *empresas* en la base de datos, definiéndola de la siguiente manera:
-
-#figure(
-    image("images/table_empresas.png", width: 100%),
-    caption: [Creación de nuestra tabla empresas.]
-  )
-
-== Inserción de registros en nuestra tabla empresas
-
-Una vez finalizada la definición de nuestra tabla, podemos dar clic en *Apply*. Regresaremos a nuestro
-espacio de trabajo, iremos a la pestaña "Schemas", donde veremos nuestra nueva
-tabla dentro de la sección "Tables". Ahí, daremos clic en el tercer botoón que aparece frente al nombre de nuestra tabla empresas.
-
-Se mostrará una ventana con un *SELECT* hacia nuestra tabla y, debajo de ella, se mostrará una
-ventana para ingresar los datos. Definiremos nuestros datos de la siguiente forma:
-
-#figure(
-    image("images/insert_empresas.png", width: 100%),
-    caption: [Inserción de registros en nuestra tabla empresas.]
-  )
-
-Después de ingresar los datos, presionaremos el botón *Apply* para guardar
-los datos en la nube. Aparecerá una ventana con la sentencia SQL que se ejecutará
-en el manejador de base de datos en la nube y daremos nuevamente clic
-en *Apply*.
-
-#figure(
-    image("images/sql_insert_empresas.png", width: 100%),
-    caption: [Inserción de registros en nuestra tabla empresas.]
-  )
-
-Si todo está correcto, aparecerá el mensaje de éxito en la ejecución de la
-sentencia. Al regresar a la pantalla, podemos observar nuestros registros, que
-ahora ya cuentan con un id asignado automáticamente por el manejador.
-
-#figure(
-    image("images/id_auto_empresas.png", width: 100%),
-    caption: [Registros en tabla empresas con ID asignado.]
-  )
-
-Con esto, podemos dar por concluida la práctica de creación de manejadores
-de base de datos en Azure y GCP.
+1. La API de detección de rostros funciona muy bien para detectar rostros en los primeros planos de la imagen.
+2. Para rostros que se encuentran muy en el fondo de la foto o que están en un plano diferente a la imagen central, tiene algunos
+    problemas de detección (E.g. primer ejemplo con imágenes propias. Dos personas que se encuentran atrás de todos, no fueron detectados).
+3. Para rostros que se encuentran muy iluminados (muy blancos) es posible que la API no detecte de buena
+    forma el rostro (E.g. segundo ejemplo con imágenes propias. Para una de las personas, sus rasgos no fueron completamente identificados y otra persona
+    no fue detectada, ya que en esa zona, la luz era mayor al resto de la imagen).
 
 #pagebreak()
+
+= Conversión de texto a voz: MS Azure Cognitive Services
+
+== Investigación y referencias del servicio
+
+Como servicio adicional seleccionado, se optó aplicar el servicio de conversión de texto
+a voz, que también pertenece a la suite de MS Azure Cognitive Services. Este servicio permite que
+nuestras aplicaciones, herramientas o dispositivos sean capaces de convertir cualquier texto a una voz
+sintenizada similar a la humana.
+
+Este servicio permite usar voces estándar, pero también permite crear voces customizadas que podamos utilizar
+dentro de nuestro productos, aplicaciones, sitios, etc.
+
+Algunos de los casos de uso de este servicio podrían ser:
+
+1. Convertir textos, libros, posts, blogs en "audiolibros".
+
+2. Asistentes de voz: Respuestas dinámicas basadas en documentos o bases de datos (saldos, estatus de pedidos, etc.)
+
+3. Personalización por región: Usar un selecto de voces para que, por ejemplo, un cliente en México escuche una
+  voz "mexicana" y alguien en España, también pueda escuchar una voz más "española", generando así mayor confianza y satisfacción.
+
+4. Avatares parlantes: Sincronizar la voz con algún contenido para cursos en línea.
+
+5. Efectos de sonido vocales: Si, por ejemplo, se quiere contar un cuento a partir de un texto, se podrían
+  usar los ajustes de pitch y rate (que se demostrarán en el código), para crear voces de monstruos, robots,
+  _animales_, etc.
+
+Podemos encontrar más sobre las capacidades y customización que se puede realizar dentro del servicio
+en la documentación oficial de Azure: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/index-text-to-speech
+
+== Configuración del servicio
+
+Para configurar este servicio, podemos seguir la sección: #link(<sec-configuracion>)[2.1 Creación del Servicio]
+dentro de este mismo documento, que básicamente se resumen en 4 pasos principales:
+
+1. Creación del servicio en Azure Portal (Crear un nuevo recurso).
+2. Configuración del servicio.
+3. Revisión y creación.
+4. Obtención de llave y endpoint.
+
+#figure(
+    image("images/azure_home_t2s.png", width: 100%),
+    caption: [Creación de un nuevo recurso: Azure Portal.]
+  )
+
+#figure(
+    image("images/servicios_ai_t2s.png", width: 100%),
+    caption: [Servicios de Azure AI.]
+  )
+
+#figure(
+    image("images/conf_azure_ai_t2s.png", width: 100%),
+    caption: [Configuración de servicio.]
+  )
+
+#figure(
+    image("images/claves_y_puntos_t2s.png", width: 100%),
+    caption: [Información general de servicio. Ir a Claves y puntos de conexión.]
+  )
+
+#figure(
+    image("images/clave_endpoint_t2s.png", width: 100%),
+    caption: [Clave y endpoint de servicio.]
+  )
+
+== Código para implementación y uso de servicio
+
+En esta sección se muestra el código utilizado para hacer uso del servicio anteriormente
+creado. El código se divide en los siguientes pasos (flujo desde punto de vista del usuario):
+
+1. Se cargan las librerías y variables de ambiente correspondiente.
+2. Se configura el API Key, así como el endpoint del servicio.
+3. Se configuran parámetros de conexión y personalización del servicio.
+4. Se genera un diccionario con diferentes personalizaciones de las voces.
+5. Se solicita al usuario una elección de "estilo de voz": Normal, Ardilla, Gigante, Noticiero, Suspenso.
+6. Se solicita al usuario un texto a "convertir".
+7. El código recibe ambos parámetros, genera un bloque de código para personalizar la voz y
+  envía la petición hacia la API.
+8. El código devuelve el audio generado a partir del texto escrito por el usuario.
+
+```python
+#Se importan librerías a utilizar en el código para utilizar el API y cargar nuestras variables de ambiente
+
+import os
+import azure.cognitiveservices.speech as speechsdk
+from dotenv import load_dotenv
+
+#Se carga nuestro archivo .env para el uso del API Key.
+
+load_dotenv()
+
+# Configuración inicial de nuestro API Key y endpoint
+subscription_key = os.getenv("SUBSCRIPTION_KEY_TEXT2SPEECH")
+ENDPOINT = 'https://textspeechmnaog.cognitiveservices.azure.com/'
+
+speech_config = speechsdk.SpeechConfig(subscription=subscription_key, endpoint=ENDPOINT)
+audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
+speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
+
+# --- DICCIONARIO DE PERFILES ---
+# Aquí definimos los efectos para la voz que utilizaremos
+voice_profiles = {
+    "1": {"name": "Normal", "pitch": "0%", "rate": "1.0"},
+    "2": {"name": "Ardilla (Helio)", "pitch": "+80%", "rate": "1.2"},
+    "3": {"name": "Gigante", "pitch": "-40%", "rate": "0.8"},
+    "4": {"name": "Noticiero (Rápido)", "pitch": "+5%", "rate": "1.3"},
+    "5": {"name": "Suspenso (Lento)", "pitch": "-10%", "rate": "0.7"}
+}
+
+#Función que recibe el texto a convertir, así como el perfil seleccionado por el usuario para la generación de la voz.
+
+def generar_ssml(texto, perfil_id):
+    # Obtener el perfil seleccionado por el usuario
+    perfil = voice_profiles.get(perfil_id, voice_profiles["1"])
+
+    # Construcción del SSML dinámico. Se define el pitch y el rate para lograr los "efectos" deseados, a partir del perfil seleccionado.
+    return f"""
+    <speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='es-MX'>
+        <voice name='es-MX-DaliaNeural'>
+            <prosody pitch='{perfil['pitch']}' rate='{perfil['rate']}'>
+                {texto}
+            </prosody>
+        </voice>
+    </speak>
+    """
+
+# --- INTERFAZ DE LA DEMO ---
+#Se imprime el título de la demo y el diccionario de perfiles.
+print("--- DEMO DE TEXT-TO-SPEECH ---")
+print("Elige un estilo de voz:")
+for key, value in voice_profiles.items():
+    print(f"{key}: {value['name']}")
+
+#Se pide un perfil al usuario, así como el texto a convertir.
+opcion = input("\nSelecciona un número (1-5): ")
+texto_a_decir = input("¿Qué quieres que diga la voz? > ")
+
+# Se manda a llamar la función para generar el SSML con el perfil elegido
+ssml_final = generar_ssml(texto_a_decir, opcion)
+
+# Se ejecuta la síntesis final para obtener el audio, a partir del texto.
+result = speech_synthesizer.speak_ssml_async(ssml_final).get()
+
+#Se imprime el resultado final
+if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+    print("\n¡Voz generada con éxito!")
+elif result.reason == speechsdk.ResultReason.Canceled:
+    print(f"Error: {result.cancellation_details.error_details}")```
+
+== Obtención de resultados y explicación
+
+A continuación se realiza una demostración en video del código anteriormente mostrado, donde:
+
+1. Se solicita al usuario que seleccione un perfil de los disponibles: Normal, Ardilla, Gigante, Noticiero, Suspenso.
+2. El usuario selecciona uno de los perfiles.
+3. Se solicita al usuario que introduzca un texto a convertir.
+4. El usuario introduce el texto que quiere convertir.
+5. El código devuelve el texto convertido a audio, con el perfil seleccionado.
+
+#link("https://www.loom.com/share/d830e55dd34a4f4aa5a31fbdb5a27d60")[Link hacia Loom para demostración del código]
+
+Con este video demostramos que la API es capaz de convertir cualquier texto hacia un audio, con
+algún perfil o modificación definida por el usuario y que el resultado es el esperado: el código recibió
+nuestra elección de perfil (Ardilla), recibió nuestro texto a convertir y regresó de forma
+correcta el audio correspondiente al texto, con la transformación adecuada de la voz.
+
+De esta forma, también reitreamos el hecho de que esta API tiene muchos casos de uso, como lo son:
+conversión de textos, libros o posts a audiolibros, asistencia telefónica personalizada, creación de
+contenido (e.g. cuentos con efectos de voz o cursos en línea), etc.
 
 = Reflexión
 
-La realización de esta práctica permite concluir que la transición hacia sistemas
-de administración de bases de datos en la nube representa una ventaja competitiva fundamental
-para el desarrollo de software moderno. Al comparar la creación de recursos
-en Azure Database for MySQL y Cloud SQL de GCP, se hace evidente que la nube simplifica tareas
-que antes requerían días de configuración manual en infraestructura física.
 
-== Ventajas y desventajas de los DBMS en la Nube
-
-- *Ventajas*
-  - *Escalabilidad Inmediata:* Capacidad de ajustar recursos de cómputo y almacenamiento según la demanda.
-  - *Alta Disponibilidad:* Configuración de redundancia en diferentes zonas para evitar
-    pérdidas de servicio.
-  - *Reducción de Gastos Operativos:* Se elimina la necesidad de gestionar hardware físico,
-    permitiendo enfocarse en la estructura de los datos.
-  - *Seguridad y Respaldos:* Integración nativa de copias de seguridad automáticas y conexiones
-    cifradas (TLS/SSL).
-
-- *Desventajas:*
-  - *Dependencia de Conectividad:* La gestión y el acceso dependen totalmente de una conexión a
-    internet estable.
-  - *Costos Variables:* Si no se monitorean adecuadamente, los costos por uso de recursos pueden
-    incrementarse rápidamente.
-  - *Latencia:* Dependiendo de la región elegida, puede existir un retardo mayor en comparación
-    con una base de datos local.
-
-En conclusión, la flexibilidad y facilidad que ofrecen herramientas como el "Flexible Server" de Azure o
-las instancias administradas de GCP permite que proyectos de cualquier escala,
-desde pruebas de desarrollo hasta aplicaciones empresariales de alto rendimiento,
-cuenten con un respaldo robusto y seguro. La habilidad para conectar entornos locales
-(como MySQL Workbench) con la infraestructura global de la nube es, sin duda, una competencia
-esencial para cualquier especialista en manejo de datos (e.g. ingeniero de datos, científico
-de datos, MLOps Engineer, etc.).
 
 #pagebreak()
 
